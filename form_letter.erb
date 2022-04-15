@@ -14,15 +14,18 @@
     </p>
 
     <table>
+    <!--Header Rows-->
       <tr>
         <th>Legislators</th>
         <th>Websites</th>
       </tr>
+    <!--Create a table row for each legislator for the attendee-->
       <% if legislators.kind_of?(Array) %>
         <% legislators.each do |legislator| %>
           <tr>
             <td><%= "#{legislator.name}" %></td>
             <td>
+            <!--If a legislator has more than one website, list them in a <ul> that gets nested inside a <td>-->
               <% if legislator.urls.length > 1 %>
                 <ul>
                   <% legislator.urls.each do |url| %>

@@ -5,6 +5,8 @@ require 'google/apis/civicinfo_v2'
 attendees = CSV.open('../event_attendees.csv', headers: true, header_converters: :symbol)
 template_letter = File.read('../form_letter.erb')
 erb_template = ERB.new(template_letter)
+reg_dates = []
+reg_hours = []
 
 def clean_phone_number(phone_num)
   phone_num = phone_num.to_s.gsub(/[^0-9]/, '')
@@ -55,6 +57,8 @@ attendees.each do |attendee|
   name = attendee[:first_name]
   phone_number = clean_phone_number(attendee[:homephone])
   zipcode = clean_zipcode(attendee[:zipcode])
+  reg_dates.push(attendee[:regdate].split(' ')[0])
+  reg_hours.push(attendee[:regdate].split(' ')[1])
   legislators = gather_legislators(zipcode)
   form_letter = erb_template.result(binding)
   save_thank_you_letter(id, form_letter)

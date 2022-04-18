@@ -9,6 +9,18 @@ erb_template = ERB.new(template_letter)
 reg_dates = []
 reg_hours = []
 
+# This is the logic that helps identify peak day and peak hour
+def peak_finder(reg_data)
+	peak_data = reg_data.reduce({}) do |hash, value|
+		hash[value] ||= 0
+		hash[value] += 1
+		hash
+	end
+
+	peak_data = peak_data.sort_by { |_key, value| value }
+	peak_data[-1][0]
+end
+
 # Function to identify day of the week most attendees have registered
 def peak_day(dates)
   reg_days = dates.map do |date|
@@ -20,14 +32,7 @@ def peak_day(dates)
     Date.strptime(date, "%m/%d/%y").strftime("%A")
   end
 
-  reg_days = reg_days.reduce({}) do |hash, day|
-    hash[day] ||= 0
-    hash[day] += 1
-    hash
-  end
-
-  reg_days = reg_days.sort_by { |_key, value| value }
-  reg_days[-1][0]
+  puts "Peak day is #{peak_finder(reg_days)}."
 end
 
 # Function to identify the hour most attendees have registered
@@ -36,16 +41,10 @@ def peak_hour(hours)
     hour.to_i
   end
 
-  reg_hours = reg_hours.reduce({}) do |hash, hour|
-    hash[hour] ||= 0
-    hash[hour] += 1
-    hash
-  end
-
-  reg_hours = reg_hours.sort_by { |key, value| value }
-  reg_hours[-1][0]
+  puts "Peak hour is #{peak_finder(reg_hours)}."
 end
 
+# Collect and clean attendee phone numbers
 def clean_phone_number(phone_num)
   phone_num = phone_num.to_s.gsub(/[^0-9]/, '')
   error_msg = 'Invaid number'
@@ -59,6 +58,7 @@ def clean_phone_number(phone_num)
   phone_num
 end
 
+# Collect and clean attendee zipcodes
 def clean_zipcode(zipcode)
   zipcode.to_s.rjust(5, '0')[0..4]
 end
@@ -101,3 +101,6 @@ attendees.each do |attendee|
   form_letter = erb_template.result(binding)
   save_thank_you_letter(id, form_letter)
 end
+
+peak_day(reg_dates)
+peak_hour(reg_hours)

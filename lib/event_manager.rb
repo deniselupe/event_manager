@@ -1,5 +1,6 @@
 require 'csv'
 require 'erb'
+require 'date'
 require 'google/apis/civicinfo_v2'
 
 attendees = CSV.open('../event_attendees.csv', headers: true, header_converters: :symbol)
@@ -7,6 +8,27 @@ template_letter = File.read('../form_letter.erb')
 erb_template = ERB.new(template_letter)
 reg_dates = []
 reg_hours = []
+
+# Function to identify day of the week most attendees have registered
+def peak_weekday(dates)
+  reg_days = dates.map do |date|
+    # For strptime(), specifier %y is being used instead of %Y as reg_date years are documented
+    #   as 2 digits (e.g., 11/12/08) and not the full 4 digit year (e.g., 11/12/2008). Years that
+    #   are '69 - '99 will be parsed as 1969 through 1999, and years that are '00 - '68 will be
+    #   parsed as 2000 to 2068. %y is being used assuming that attendees register between 2000 and 2068.
+    #   Resource: https://pubs.opengroup.org/onlinepubs/9699919799/functions/strptime.html
+    Date.strptime(date, "%m/%d/%y").strftime("%A")
+  end
+
+  reg_days = reg_days.reduce({}) do |hash, day|
+    hash[day] ||= 0
+    hash[day] += 1
+    hash
+  end
+
+  reg_days = reg_days.sort_by { |_key, value| value }
+  reg_days[-1][0]
+end
 
 def clean_phone_number(phone_num)
   phone_num = phone_num.to_s.gsub(/[^0-9]/, '')

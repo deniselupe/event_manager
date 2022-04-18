@@ -10,7 +10,7 @@ reg_dates = []
 reg_hours = []
 
 # Function to identify day of the week most attendees have registered
-def peak_weekday(dates)
+def peak_day(dates)
   reg_days = dates.map do |date|
     # For strptime(), specifier %y is being used instead of %Y as reg_date years are documented
     #   as 2 digits (e.g., 11/12/08) and not the full 4 digit year (e.g., 11/12/2008). Years that
@@ -28,6 +28,22 @@ def peak_weekday(dates)
 
   reg_days = reg_days.sort_by { |_key, value| value }
   reg_days[-1][0]
+end
+
+# Function to identify the hour most attendees have registered
+def peak_hour(hours)
+  reg_hours = hours.map do |hour|
+    hour.to_i
+  end
+
+  reg_hours = reg_hours.reduce({}) do |hash, hour|
+    hash[hour] ||= 0
+    hash[hour] += 1
+    hash
+  end
+
+  reg_hours = reg_hours.sort_by { |key, value| value }
+  reg_hours[-1][0]
 end
 
 def clean_phone_number(phone_num)
